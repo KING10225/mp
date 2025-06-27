@@ -1,0 +1,70 @@
+4. Implement Candidate Elimination algorithm and display all the consistent hypotheses using 
+appropriate training samples. 
+
+import csv
+
+with open("enjoysport.csv", 'r') as f:
+    reader = csv.reader(f)
+    data = list(reader)
+
+print("Training Data \n")
+for row in data:
+    print(row)
+
+print("---------------------------------")
+
+attr_len = len(data[0]) - 1
+s = ['0'] * attr_len
+g = ['?'] * attr_len
+temp = []
+
+print("The Hypotheses are \n")
+print("s =", s)
+print("g =", g)
+print("----------------------------------")
+
+for row in data:
+    if row[-1] == 'yes':
+        j = 0
+        for col in row[:-1]: 
+            if col != s[j] and s[j] == '0':
+                s[j] = col
+            elif col != s[j] and s[j] != '?':
+                s[j] = '?'
+            j = j + 1
+        print("s =", s)
+        print("g =", g)
+        print("-----------------------")
+
+        for j in range(0, attr_len):
+            for k in temp[:]:  # Iterate over copy to safely remove
+                if k[j] != s[j] and s[j] != '?':
+                    temp.remove(k)
+
+    elif row[-1] == 'no':
+        j = 0
+        for col in row[:-1]:  # Skip class label
+            if col != s[j] and s[j] != '?':
+                g[j] = s[j]
+                temp.append(g)
+                g = ['?'] * attr_len
+            j = j + 1
+        print("s =", s)
+        print("g =", temp)
+        print("--------------------")
+
+print("Final Specific Hypothesis:")
+print("s =", s)
+print("Final General Hypotheses:")
+if len(temp) == 0:
+    print("g =", g)
+else:
+    print("g =", temp)
+print("-------------------------------------")
+----------------------------------------------------------------------------------
+enjoysport.csv
+
+	sunny   	warm  	normal	strong  	warm    	same	Yes
+1	sunny   	warm  	high  	strong  	warm    	same	yes
+2	rainy  	cold     	high  	strong  	warm    	change   	No
+3	sunny   	warm  	high  	strong  	cool	change   	Yes

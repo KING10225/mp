@@ -1,0 +1,75 @@
+9. Implement the non-parametric Locally Weighted Regression algorithm in order to fit data 
+points. Select the appropriate data set for your experiment and draw graphs. 
+
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from scipy.stats import pearsonr
+
+def kernel(point, xmat, k):
+    m, n = np.shape(xmat)
+    weights = np.mat(np.eye((m)))
+    for j in range(m):
+        diff = point - xmat[j]
+        weights[j, j] = np.exp(diff * diff.T / (-2.0 * k ** 2))
+    return weights
+
+def localWeight(point, xmat, ymat, k):
+    wei = kernel(point, xmat, k)
+    w = np.linalg.pinv(xmat.T * (wei * xmat)) * (xmat.T * (wei * ymat.T))
+    return w
+
+def localWeightRegression(xmat, ymat, k):
+    m, n = np.shape(xmat)
+    ypred = np.zeros(m)
+    for i in range(m):
+        ypred[i] = (xmat[i] * localWeight(xmat[i], xmat, ymat, k))[0, 0]
+    return ypred
+
+data = pd.read_csv("tips.csv")
+bill = np.array(data['total_bill'])
+tip = np.array(data['tip'])
+
+m = bill.shape[0]
+X = np.mat(np.c_[np.ones(m), bill])
+Y = np.mat(tip)
+
+ypred = localWeightRegression(X, Y, 0.3)
+
+sortIndex = X[:, 1].A1.argsort() 
+xsort = X[sortIndex][:, 1]
+ysort = ypred[sortIndex]
+
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1)
+ax.scatter(bill, tip, color='green')
+ax.plot(np.array(xsort), ysort, color='red', linewidth=2)
+plt.xlabel('Total Bill')
+plt.ylabel('Tip')
+plt.title('Locally Weighted Regression')
+plt.show()
+
+------------------------------------------------------------------------
+tips.csv
+
+	total_bill	tip
+1	16.99	1.01
+2	10.34	1.66
+3	21.01	3.50
+4	23.68	3.31
+5	24.59	3.61
+6	25.29	4.71
+7	8.77	2.00
+8	26.88	3.12
+9	15.04	1.96
+10	14.78	3.23
+11	10.27	1.71
+12	35.26	5.00
+13	15.42	1.57
+14	18.43	3.00
+15	14.83	3.02
+16	21.58	3.92
+17	10.33	1.67
+18	16.29	3.71
+19	16.97	3.50
+20	20.65	3.35

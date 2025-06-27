@@ -1,0 +1,36 @@
+3. Demonstrate the working of Find-S algorithm for finding the most specificities hypothesis 
+using appropriate training samples. 
+
+import csv
+
+with open('target.csv', 'r') as f:
+    reader = csv.reader(f)
+    data = list(reader)
+
+print("Training Data:\n")
+for row in data:
+    print(row)
+
+attr_len = len(data[0]) - 1
+h = ['0'] * attr_len
+print("\nInitial Hypothesis: h =", h)
+
+print("\nThe Hypotheses After Each Training Example:\n")
+k = 0
+for row in data:
+    if row[-1].lower() == 'yes': 
+        for j in range(attr_len):
+            if h[j] == '0':
+                h[j] = row[j]
+            elif h[j] != row[j]:
+                h[j] = '?'
+    print(f"h{k} = {h}")
+    k += 1
+
+print(f"\nFinal Maximally Specific Hypothesis: h{k-1} = {h}")
+----------------------------------------------------------------
+target.csv
+	sunny   	warm  	normal	strong  	warm    	same	Yes
+1	sunny   	warm  	high  	strong  	warm    	same	yes
+2	rainy  	cold     	high  	strong  	warm    	change   	No
+3	sunny   	warm  	high  	strong  	cool	change   	Yes

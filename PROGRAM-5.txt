@@ -1,0 +1,63 @@
+5. Create a .CSV file for the datasets containing the following fields( age, income, student, 
+credit_rating, Buys_computer) where Buys_computer is the target attribute and implement ID3 
+algorithm for the same.
+
+import pandas as pd
+import numpy as np
+
+dataset = pd.read_csv(r"Book1.csv",
+                      names=['age', 'income', 'student', 'credit_rating', 'buys_computer'])
+
+def entropy(col):
+    values, counts = np.unique(col, return_counts=True)
+    probs = counts / np.sum(counts)
+    return -np.sum(probs * np.log2(probs))
+
+def info_gain(data, feature, target='buys_computer'):
+    total_entropy = entropy(data[target])
+    vals, counts = np.unique(data[feature], return_counts=True)
+    weighted_entropy = np.sum([
+        (counts[i] / np.sum(counts)) * entropy(data[data[feature] == vals[i]][target])
+        for i in range(len(vals))
+    ])
+    return total_entropy - weighted_entropy
+
+def ID3(data, features, target='buys_computer'):
+    if len(np.unique(data[target])) == 1:
+        return data[target].iloc[0]
+    
+    if len(data) == 0 or len(features) == 0:
+        return data[target].mode()[0]
+
+    gains = [info_gain(data, f, target) for f in features]
+    best_feat = features[np.argmax(gains)]
+
+    tree = {best_feat: {}}
+    for val in np.unique(data[best_feat]):
+        sub_data = data[data[best_feat] == val]
+        subtree = ID3(sub_data, [f for f in features if f != best_feat], target)
+        tree[best_feat][val] = subtree
+        
+    return tree
+
+features = list(dataset.columns[:-1])
+tree = ID3(dataset, features)
+
+print("\nDecision Tree:\n", tree)
+--------------------------------------------------------------------
+Book1.csv
+
+	﻿youth	high	no	fair	no
+1	youth	high	no	excellent	no
+2	middle_aged	high	no	fair	yes
+3	senior	medium	no	fair	yes
+4	senior	low	yes	fair	yes
+5	senior	low	yes	excellent	no
+6	middle_aged	low	yes	excellent	yes
+7	youth	medium	no	fair	no
+8	youth	low	yes	fair	yes
+9	senior	medium	yes	fair	yes
+10	youth	medium	yes	excellent	yes
+11	middle_aged	medium	no	excellent	yes
+12	middle_aged	high	yes	fair	yes
+13	senior	medium	no	excellent	no

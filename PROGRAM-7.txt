@@ -1,0 +1,34 @@
+7. Implement KNN algorithm to classify “iris dataset” using Kaggle or Machine learning 
+repositories. 
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
+
+iris = load_iris()
+
+X_train, X_test, y_train, y_test = train_test_split(
+    iris.data, iris.target, test_size=0.25, random_state=42
+)
+
+clf = KNeighborsClassifier()
+clf.fit(X_train, y_train)
+
+y_pred = clf.predict(X_test)
+
+cm = confusion_matrix(y_test, y_pred)
+print('Confusion matrix is as follows:\n', cm)
+print('\nAccuracy Metrics:')
+print(classification_report(y_test, y_pred))
+print("Correct predictions:", accuracy_score(y_test, y_pred))
+print("Wrong predictions:", 1 - accuracy_score(y_test, y_pred))
+
+print("\nPredicted Data:")
+print(prediction := clf.predict(X_test)) 
+print("\nTest data:")
+print(y_test)
+diff = prediction - y_test
+print("\nResult (Prediction - Actual):")
+print(diff)
+print('Total number of samples misclassified =', sum(abs(diff)))

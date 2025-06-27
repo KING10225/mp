@@ -1,0 +1,124 @@
+8. Implement the naïve Bayesian classifier for a sample training data set stored as a .CSV file. 
+Compute the accuracy of the classifier, considering few test data sets.
+
+import numpy as np
+import math
+import csv
+
+def read_data(filename):
+    with open(filename, "r") as csvfile:
+        datareader = csv.reader(csvfile)
+        traindata = list(datareader)
+        metadata = traindata[0]
+        traindata = traindata[1:]
+    return metadata, traindata
+
+def splitdataset(dataset, splitratio):
+    trainsize = int(len(dataset) * splitratio)
+    trainset = []
+    testset = list(dataset)
+    i = 0
+    while len(trainset) < trainsize:
+        trainset.append(testset.pop(0))
+    return [trainset, testset]
+
+def classify(data, test):
+    total_size = data.shape[0]
+    print("\n")
+    print("Training data size:", total_size)
+    print("Test data size:", test.shape[0])
+
+    countyes = 0
+    countno = 0
+    probyes = 0
+    probno = 0
+
+    print("\nTarget | Count | Probability")
+    for x in range(data.shape[0]):
+        if data[x, data.shape[1] - 1] == 'yes':
+            countyes += 1
+        if data[x, data.shape[1] - 1] == 'no':
+            countno += 1
+
+    probyes = countyes / total_size
+    probno = countno / total_size
+
+    print("Yes |", countyes, "|", probyes)
+    print("No  |", countno, "|", probno)
+
+    prob0 = np.zeros((test.shape[1] - 1,))
+    prob1 = np.zeros((test.shape[1] - 1,))
+
+    accuracy = 0
+    print("\nInstance\tPrediction\tTarget")
+
+    for t in range(test.shape[0]):
+        for k in range(test.shape[1] - 1):
+            count0 = 0
+            count1 = 0
+            for j in range(data.shape[0]):
+                if test[t][k] == data[j][k] and data[j][data.shape[1] - 1] == 'no':
+                    count0 += 1
+                if test[t][k] == data[j][k] and data[j][data.shape[1] - 1] == 'yes':
+                    count1 += 1
+
+            prob0[k] = count0 / countno if countno != 0 else 0
+            prob1[k] = count1 / countyes if countyes != 0 else 0
+
+        probyes1 = probyes
+        probno1 = probno
+
+        for j in range(test.shape[1] - 1):
+            probno1 *= prob0[j]
+            probyes1 *= prob1[j]
+
+        if probno1 > probyes1:
+            predict = 'no'
+        else:
+            predict = 'yes'
+
+        print(t + 1, "\t", predict, "\t\t", test[t, test.shape[1] - 1])
+        if predict == test[t, test.shape[1] - 1]:
+            accuracy += 1
+
+    final_accuracy = (accuracy / test.shape[0]) * 100
+    print("\nAccuracy:", final_accuracy, "%")
+
+
+metadata, traindata = read_data("enjoysports.csv")
+print("The attribute names of training data are:")
+print(metadata)
+
+splitratio = 0.7
+trainset, testset = splitdataset(traindata, splitratio)
+
+training = np.array(trainset)
+print("\nThe Training data set are:")
+for x in training:
+    print(x)
+
+testing = np.array(testset)
+print("\nThe Test data set are:")
+for x in testing:
+    print(x)
+
+classify(training, testing)
+
+--------------------------------------------------------------------------
+enjoysports.csv
+
+	outlook	temperature	humidity	windy	play
+1	sunny	hot	high	false	no
+2	sunny	hot	high	true	no
+3	overcast	hot	high	false	yes
+4	rainy	mild	high	false	yes
+5	rainy	cool	normal	false	yes
+6	rainy	cool	normal	true	no
+7	overcast	cool	normal	true	yes
+8	sunny	mild	high	false	no
+9	sunny	cool	normal	false	yes
+10	rainy	mild	normal	false	yes
+11	sunny	mild	normal	true	yes
+12	overcast	mild	high	true	yes
+13	overcast	hot	normal	false	yes
+14	rainy	mild	high	true	no
